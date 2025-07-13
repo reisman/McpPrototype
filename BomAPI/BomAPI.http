@@ -1,0 +1,6 @@
+@BomAPI_HostAddress = http://localhost:5033
+
+GET {{BomAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

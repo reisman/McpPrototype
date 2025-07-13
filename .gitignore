@@ -1,0 +1,12 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea/
+.vscode/
+BomDB
+IdentityDB
+.DS_Store
+secrets.json
+McpPrototype.sln.DotSettings.user
