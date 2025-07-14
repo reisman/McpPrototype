@@ -10,9 +10,9 @@ public sealed class BomController : ControllerBase
     #region find
     
     [HttpGet("{id:int}")]
-    public async ValueTask<PartDto?> Find(int id)
+    public async ValueTask<PartDto?> Find(int id, CancellationToken cancellationToken)
     {
-        var part = await BomRepository.Find(id);
+        var part = await BomRepository.Find(id, cancellationToken);
         if (part is null) return null;
 
         return new PartDto
@@ -24,9 +24,9 @@ public sealed class BomController : ControllerBase
     }
     
     [HttpGet]
-    public async ValueTask<IEnumerable<PartDto>> FindAll()
+    public async ValueTask<IEnumerable<PartDto>> FindAll(CancellationToken cancellationToken)
     {
-        var parts = await BomRepository.FindAll();
+        var parts = await BomRepository.FindAll(cancellationToken);
         return parts.Select(part => new PartDto
         {
             Id = part.Id,
@@ -40,7 +40,7 @@ public sealed class BomController : ControllerBase
     #region create
     
     [HttpPost(Name = "Create")]
-    public ValueTask<int> Create([FromBody] PartDto partDto)
+    public ValueTask<int> Create([FromBody] PartDto partDto, CancellationToken cancellationToken)
     {
         var part = new Part
         {
@@ -48,7 +48,7 @@ public sealed class BomController : ControllerBase
             Number = partDto.Number
         };
 
-        return BomRepository.Create(part);
+        return BomRepository.Create(part, cancellationToken);
     }
     
     #endregion
@@ -56,7 +56,7 @@ public sealed class BomController : ControllerBase
     #region edit
     
     [HttpPatch("{id:int}")]
-    public ValueTask Edit(int id, [FromBody] PartDto partDto)
+    public ValueTask Edit(int id, [FromBody] PartDto partDto, CancellationToken cancellationToken)
     {
         var part = new Part
         {
@@ -65,7 +65,7 @@ public sealed class BomController : ControllerBase
             Number = partDto.Number
         };
 
-        return BomRepository.Update(part);
+        return BomRepository.Update(part, cancellationToken);
     }
     
     #endregion
@@ -73,9 +73,9 @@ public sealed class BomController : ControllerBase
     #region delete
     
     [HttpDelete("{id:int}")]
-    public async ValueTask<bool> Delete(int id)
+    public async ValueTask<bool> Delete(int id, CancellationToken cancellationToken)
     {
-        return await BomRepository.Delete(id);
+        return await BomRepository.Delete(id, cancellationToken);
     }
     
     #endregion

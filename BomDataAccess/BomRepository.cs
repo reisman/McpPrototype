@@ -4,43 +4,43 @@ namespace BomDataAccess;
 
 public static class BomRepository
 {
-    public static async ValueTask<IReadOnlyCollection<Part>> FindAll()
+    public static async ValueTask<IReadOnlyCollection<Part>> FindAll(CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
-        return await context.Parts.ToListAsync();
+        return await context.Parts.ToListAsync(cancellationToken);
     }
     
-    public static async ValueTask<Part?> Find(int id)
+    public static async ValueTask<Part?> Find(int id, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
-        return await context.Parts.FindAsync(id);
+        return await context.Parts.FindAsync([id], cancellationToken: cancellationToken);
     }
     
-    public static async ValueTask<int> Create(Part part)
+    public static async ValueTask<int> Create(Part part, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         context.Parts.Add(part);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
         return part.Id;
     }
     
-    public static async ValueTask Update(Part part)
+    public static async ValueTask Update(Part part, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         context.Parts.Attach(part);
         context.Entry(part).State = EntityState.Modified;
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
     }
     
-    public static async ValueTask<bool> Delete(int id)
+    public static async ValueTask<bool> Delete(int id, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         
-        var part = await Find(id);
+        var part = await Find(id, cancellationToken);
         if (part is null) return false;
         
         context.Parts.Remove(part);
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
         return true;
     }
 }
