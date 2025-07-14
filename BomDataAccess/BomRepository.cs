@@ -28,6 +28,7 @@ public static class BomRepository
     {
         await using var context = BomDbContext.Create();
         context.Parts.Attach(part);
+        context.Entry(part).State = EntityState.Modified;
         await context.SaveChangesAsync();
     }
     

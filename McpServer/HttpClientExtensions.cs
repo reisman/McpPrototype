@@ -4,7 +4,7 @@ namespace McpServer;
 
 internal static class HttpClientExtensions
 {
-    internal static async ValueTask<JsonDocument> ReadJsonDocumentAsync(this HttpClient client, string requestUri)
+    internal static async ValueTask<JsonDocument> ReadJsonDocumentAsync(this HttpClient client, Uri requestUri)
     {
         using var response = await client.GetAsync(requestUri);
         response.EnsureSuccessStatusCode();
