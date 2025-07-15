@@ -32,6 +32,19 @@ public static class BomRepository
         await context.SaveChangesAsync(cancellationToken);
     }
     
+    public static async ValueTask<int?> AddSubPart(int id, Part subPart, CancellationToken cancellationToken)
+    {
+        var part = await Find(id, cancellationToken);
+        if (part is null) return null;
+        
+        await using var context = BomDbContext.Create();
+        context.Parts.Add(subPart);
+        part.Children.Add(subPart);
+        await context.SaveChangesAsync(cancellationToken);
+
+        return subPart.Id;
+    }
+    
     public static async ValueTask<bool> Delete(int id, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();

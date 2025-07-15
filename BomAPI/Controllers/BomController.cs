@@ -68,6 +68,18 @@ public sealed class BomController : ControllerBase
         return BomRepository.Update(part, cancellationToken);
     }
     
+    [HttpPatch("addsubpart/{id:int}")]
+    public async ValueTask AddSubPart(int id, [FromBody] PartDto subPartDto, CancellationToken cancellationToken)
+    {
+        var subPart = new Part
+        {
+            Name = subPartDto.Name,
+            Number = subPartDto.Number
+        };
+
+        await BomRepository.AddSubPart(id, subPart, cancellationToken);
+    }
+    
     #endregion
     
     #region delete

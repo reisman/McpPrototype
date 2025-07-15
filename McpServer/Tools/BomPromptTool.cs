@@ -53,6 +53,13 @@ public sealed class BomPromptTool
             $"Update the part with id '{id}' to have name '{name}' and number '{number}'");
     }
 
+    [UsedImplicitly]
+    [McpServerPrompt]
+    [Description("Prompt for adding a sub part with the given name and number using the BOM API")]
+    public ChatMessage AddSubPart(int id, string name, string number)
+    {
+        return new ChatMessage(ChatRole.User, $"Add a new sub part below part with id '{id}' to have name '{name}' and number '{number}'");
+    }
     #endregion
 
     #region deletion
