@@ -1,3 +1,4 @@
+using System.Text;
 using BomDataAccess;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,12 +35,35 @@ public sealed class BomController : ControllerBase
             Number = part.Number
         });
     }
+
+    [HttpGet("showbom/{id:int}")]
+    public async ValueTask<string> ShowBom(int id, CancellationToken cancellationToken)
+    {
+        var rootPart = await BomRepository.LoadBom(id, cancellationToken);
+        if (rootPart is null) return string.Empty;
+        
+        var builder = new StringBuilder();
+        PrintBomRecursive(rootPart, builder, 0);
+        return builder.ToString();
+    }
+    
+    private static void PrintBomRecursive(Part part, StringBuilder builder, int indentLevel)
+    {
+        var indent = new string(' ', indentLevel * 2);
+        var message = $"{indent}Part Id: {part.Id}, Name: {part.Name}, Number: {part.Number}";
+        builder.AppendLine(message);
+        
+        foreach (var subPart in part.Children)
+        {
+            PrintBomRecursive(subPart, builder, indentLevel + 1);
+        }
+    }
     
     #endregion
     
     #region create
     
-    [HttpPost(Name = "Create")]
+    [HttpPost]
     public ValueTask<int> Create([FromBody] PartDto partDto, CancellationToken cancellationToken)
     {
         var part = new Part

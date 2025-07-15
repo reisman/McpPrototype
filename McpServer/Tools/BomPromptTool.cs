@@ -28,6 +28,14 @@ public sealed class BomPromptTool
         return new ChatMessage(ChatRole.User, $"Show me all information for part with id {id}");
     }
 
+    [UsedImplicitly]
+    [McpServerPrompt]
+    [Description("Prompt for showing a BOM for part with the given id from the BOM API")]
+    public ChatMessage ShowBom(int id)
+    {
+        return new ChatMessage(ChatRole.User, $"Show me the BOM for part with id {id}");
+    }
+    
     #endregion
 
     #region creation

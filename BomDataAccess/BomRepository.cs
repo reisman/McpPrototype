@@ -16,6 +16,31 @@ public static class BomRepository
         return await context.Parts.FindAsync([id], cancellationToken: cancellationToken);
     }
     
+    public static async Task<Part?> LoadBom(int id, CancellationToken cancellationToken)
+    {
+        await using var context = BomDbContext.Create();
+        var rootPart = await Find(id, cancellationToken);
+        if (rootPart is null) return null;
+        
+        var currentParts = new[] { rootPart };
+        while (currentParts.Any())
+        {
+            foreach (var currentPart in currentParts)
+            {
+                await context
+                    .Entry(currentPart)
+                    .Collection(b => b.Children)
+                    .LoadAsync(cancellationToken);
+            }
+
+            currentParts = currentParts
+                .SelectMany(part => part.Children)
+                .ToArray();
+        }
+
+        return rootPart;
+    }
+    
     public static async ValueTask<int> Create(Part part, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
@@ -34,10 +59,13 @@ public static class BomRepository
     
     public static async ValueTask<int?> AddSubPart(int id, Part subPart, CancellationToken cancellationToken)
     {
-        var part = await Find(id, cancellationToken);
-        if (part is null) return null;
-        
         await using var context = BomDbContext.Create();
+        
+        var part = await context.Parts
+            .Include(p => p.Children)
+            .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+        if (part is null) return null;
+
         context.Parts.Add(subPart);
         part.Children.Add(subPart);
         await context.SaveChangesAsync(cancellationToken);

@@ -56,6 +56,19 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         return partString;
     }
 
+    [UsedImplicitly]
+    [McpServerTool]
+    [Description("Shows the BOM for a part with the given id from the BOM API")]
+    public async ValueTask<string> ShowBom(
+        [Description("The id of the BOM root part")] int id,
+        CancellationToken cancellationToken)
+    {
+        var client = this.CreateClient();
+        var requestUri = GetRequestUri(id, "showbom");
+        var bomString = await client.ReadAsync(requestUri, cancellationToken);
+        return bomString;
+    }
+    
     #endregion
     
     #region creation
@@ -132,7 +145,7 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         var content = Serialize(partDto);
         var client = this.CreateClient();
         var requestUri = GetRequestUri(id, "addsubpart");
-        var response = await client.PostAsync(requestUri, content, cancellationToken);
+        var response = await client.PatchAsync(requestUri, content, cancellationToken);
 
         return response.IsSuccessStatusCode 
             ? "Sub part updated successfully." 
