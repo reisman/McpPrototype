@@ -4,7 +4,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 var services = builder.Services;
 services.AddOpenApi();
-services.AddMcpServer().WithHttpTransport().WithToolsFromAssembly();
+services
+    .AddMcpServer()
+    .WithHttpTransport()
+    .WithToolsFromAssembly()
+    .WithPromptsFromAssembly()
+    .WithResourcesFromAssembly();
+
 services.AddHttpClient("BomApiClient", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5033");
