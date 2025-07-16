@@ -32,7 +32,8 @@ public sealed class BomController : ControllerBase
         {
             Id = part.Id,
             Name = part.Name,
-            Number = part.Number
+            Number = part.Number,
+            ParentId = part.Parent?.Id
         });
     }
 

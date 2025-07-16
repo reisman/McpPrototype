@@ -26,5 +26,6 @@ var result = await connection.ExecuteTool("get_parts", new Dictionary<string, ob
 Console.WriteLine("Result: " + ((TextContentBlock)result.Content[0]).Text);
 Console.WriteLine();
 
+
 Console.WriteLine("Done");
 Console.ReadLine();

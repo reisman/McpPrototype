@@ -34,7 +34,7 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         var parts = result.Deserialize<IEnumerable<PartDto>>(SerializerOptions);
         if (parts is null) return "No parts found.";
         
-        var partStrings = parts.Select(part => $"Part with Id '{part.Id}', Name: '{part.Name}', Number: '{part.Number}'");
+        var partStrings = parts.Select(part => part.ToString());
         return string.Join(Environment.NewLine, partStrings);
     }
 
@@ -52,8 +52,7 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         var part = result.Deserialize<PartDto>(SerializerOptions);
         if (part is null) return $"Part with Id '{id}' not found.";
         
-        var partString = $"Part with Id '{part.Id}', Name: '{part.Name}', Number: '{part.Number}'";
-        return partString;
+        return part.ToString();
     }
 
     [UsedImplicitly]
