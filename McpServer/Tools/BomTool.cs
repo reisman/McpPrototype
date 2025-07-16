@@ -50,9 +50,9 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         var result = await client.ReadJsonDocumentAsync(requestUri, cancellationToken);
         
         var part = result.Deserialize<PartDto>(SerializerOptions);
-        if (part is null) return $"Part with Id '{id}' not found.";
-        
-        return part.ToString();
+        return part is null 
+            ? $"Part with Id '{id}' not found." 
+            : part.ToString();
     }
 
     [UsedImplicitly]

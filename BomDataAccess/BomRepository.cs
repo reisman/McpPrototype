@@ -23,7 +23,7 @@ public static class BomRepository
         if (rootPart is null) return null;
         
         var currentParts = new[] { rootPart };
-        while (currentParts.Any())
+        while (currentParts.Length > 0)
         {
             foreach (var currentPart in currentParts)
             {

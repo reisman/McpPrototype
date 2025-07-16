@@ -51,12 +51,15 @@ public sealed class BomController : ControllerBase
     private static void PrintBomRecursive(Part part, StringBuilder builder, int indentLevel)
     {
         var indent = new string(' ', indentLevel * 2);
-        var message = $"{indent}Part Id: {part.Id}, Name: {part.Name}, Number: {part.Number}";
+        var prefix = indentLevel == 0 ? "" : indent + "├─";
+        var message = $"{prefix}Part Id: {part.Id}, Name: {part.Name}, Number: {part.Number}";
         builder.AppendLine(message);
-        
-        foreach (var subPart in part.Children)
+
+        var children = part.Children.ToList() ?? new List<Part>();
+        for (int i = 0; i < children.Count; i++)
         {
-            PrintBomRecursive(subPart, builder, indentLevel + 1);
+            var child = children[i];
+            PrintBomRecursive(child, builder, indentLevel + 1);
         }
     }
     
