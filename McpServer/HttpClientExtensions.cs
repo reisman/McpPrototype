@@ -39,16 +39,17 @@ internal static class HttpClientExtensions
         return await response.Content.ReadAsStringAsync(cancellationToken);
     }
     
-    internal static ValueTask<HttpResponseMessage> Delete(
+    internal static async ValueTask Delete(
         this HttpClient client, 
         Uri requestUri, 
         CancellationToken cancellationToken)
     {
         var pipeline = CreatePipeline();
-        return pipeline.ExecuteAsync(async token => await client.DeleteAsync(requestUri, token), cancellationToken);
+        var response = await pipeline.ExecuteAsync(async token => await client.DeleteAsync(requestUri, token), cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
     
-    internal static ValueTask<HttpResponseMessage> Post<T>(
+    internal static async ValueTask Post<T>(
         this HttpClient client, 
         Uri requestUri, 
         T contentObj, 
@@ -56,10 +57,11 @@ internal static class HttpClientExtensions
     {
         var content = Serialize(contentObj);
         var pipeline = CreatePipeline();
-        return pipeline.ExecuteAsync(async token => await client.PostAsync(requestUri, content, token), cancellationToken);
+        var response = await pipeline.ExecuteAsync(async token => await client.PostAsync(requestUri, content, token), cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
     
-    internal static ValueTask<HttpResponseMessage> Patch<T>(
+    internal static async ValueTask Patch<T>(
         this HttpClient client, 
         Uri requestUri, 
         T contentObj, 
@@ -67,14 +69,21 @@ internal static class HttpClientExtensions
     {
         var content = Serialize(contentObj);
         var pipeline = CreatePipeline();
-        return pipeline.ExecuteAsync(async token => await client.PatchAsync(requestUri, content, token), cancellationToken);
+        var response = await pipeline.ExecuteAsync(async token => await client.PatchAsync(requestUri, content, token), cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 
+    #region serialize
+    
     private static StringContent Serialize<T>(T obj)
     {
         var partString = JsonSerializer.Serialize(obj);
         return new StringContent(partString, System.Text.Encoding.UTF8, "application/json");
     }
+    
+    #endregion
+    
+    #region pipeline
     
     private static ResiliencePipeline CreatePipeline()
     {
@@ -92,4 +101,6 @@ internal static class HttpClientExtensions
             .AddTimeout(timeout)
             .Build();
     }
+    
+    #endregion
 }

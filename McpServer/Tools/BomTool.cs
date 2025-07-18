@@ -47,8 +47,7 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         CancellationToken cancellationToken)
     {
         var requestUri = GetRequestUri(id, "showbom");
-        var bomString = await this.CreateClient().GetString(requestUri, cancellationToken);
-        return bomString;
+        return await this.CreateClient().GetString(requestUri, cancellationToken);
     }
     
     #endregion
@@ -70,11 +69,8 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         };
         
         var requestUri = GetRequestUri();
-        var response = await this.CreateClient().Post(requestUri, partDto, cancellationToken);
-
-        return response.IsSuccessStatusCode 
-            ? "Part created successfully." 
-            : $"Failed to create part: {response.ReasonPhrase}";
+        await this.CreateClient().Post(requestUri, partDto, cancellationToken);
+        return "Part created successfully.";
     }
 
     #endregion
@@ -98,11 +94,8 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         };
         
         var requestUri = GetRequestUri(id);
-        var response = await this.CreateClient().Patch(requestUri, partDto, cancellationToken);
-
-        return response.IsSuccessStatusCode 
-            ? "Part updated successfully." 
-            : $"Failed to update part: {response.ReasonPhrase}";
+        await this.CreateClient().Patch(requestUri, partDto, cancellationToken);
+        return "Part updated successfully.";
     }
 
     [UsedImplicitly]
@@ -121,11 +114,8 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         };
         
         var requestUri = GetRequestUri(id, "addsubpart");
-        var response = await this.CreateClient().Patch(requestUri, partDto, cancellationToken);
-
-        return response.IsSuccessStatusCode 
-            ? "Sub part updated successfully." 
-            : $"Failed to create sub part: {response.ReasonPhrase}";
+        await this.CreateClient().Patch(requestUri, partDto, cancellationToken);
+        return "Sub part updated successfully.";
     }
     
     #endregion
@@ -140,11 +130,8 @@ public sealed class BomTool(IHttpClientFactory httpClientFactory)
         CancellationToken cancellationToken)
     {
         var requestUri = GetRequestUri(id);
-        var response = await this.CreateClient().Delete(requestUri, cancellationToken);
-
-        return response.IsSuccessStatusCode 
-            ? "Part deleted successfully." 
-            : $"Failed to delete part: {response.ReasonPhrase}";
+        await this.CreateClient().Delete(requestUri, cancellationToken);
+        return "Part deleted successfully.";
     }
     
     #endregion
