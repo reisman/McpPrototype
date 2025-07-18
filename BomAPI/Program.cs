@@ -9,7 +9,7 @@ services.AddOpenApi();
 var app = builder.Build();
 app.MapOpenApi();
 app.UseHttpsRedirection();
-app.UseMiddleware<ApiKeyMiddleware>();
+// app.UseMiddleware<ApiKeyMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 
