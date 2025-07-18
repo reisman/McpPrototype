@@ -12,3 +12,8 @@
   }
 }
 ```
+
+# Use MCP
+- Start project "BomAPI"
+- Start project "MCPServer"
+- Type commands in VSCode chat
