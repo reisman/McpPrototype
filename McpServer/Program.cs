@@ -6,7 +6,7 @@ var configuration = builder.Configuration;
 configuration.AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
 
 var services = builder.Services;
-services.AddLogging();
+services.AddLogging(b => b.AddConsole());
 services.AddSingleton<IConfigurationReader, ConfigurationReader>();
 services.AddOpenApi();
 services.AddHttpClient("BomApiClient", HttpClientConfiguration.ConfigureClient);
