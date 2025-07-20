@@ -1,9 +1,13 @@
-using System.Net.Http.Headers;
+using McpServer;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
 
 var services = builder.Services;
+services.AddLogging();
+services.AddSingleton<IConfigurationReader, ConfigurationReader>();
 services.AddOpenApi();
+
 services
     .AddMcpServer()
     .WithHttpTransport()
@@ -11,23 +15,24 @@ services
     .WithPromptsFromAssembly()
     .WithResourcesFromAssembly();
 
-services.AddHttpClient("BomApiClient", client =>
+services.AddHttpClient("BomApiClient", (serviceProvider, client) =>
 {
-    client.BaseAddress = new Uri("http://localhost:5033");
-    var productInfo = new ProductInfoHeaderValue("bom-tool", "1.0");
-    client.DefaultRequestHeaders.UserAgent.Add(productInfo);
-
-    var configurationRoot = new ConfigurationBuilder()
-        .AddJsonFile("secrets.json")
-        .Build();
+    var configuration = serviceProvider.GetRequiredService<IConfigurationReader>();
     
-    var apiKey = configurationRoot["ApiKey"];
-    client.DefaultRequestHeaders.Add("X-API-KEY", apiKey);
+    var productInfo = configuration.GetProductInfo();
+    client.DefaultRequestHeaders.UserAgent.Add(productInfo);
+    client.BaseAddress = configuration.GetApiEndpoint();
+    
+    var apiKey = configuration.GetApiKey();
+    if (!string.IsNullOrWhiteSpace(apiKey))
+    {
+        client.DefaultRequestHeaders.Add("X-API-KEY", apiKey);
+    }
 });
 
 var app = builder.Build();
+app.UseHttpsRedirection();
 app.MapOpenApi();
 app.MapMcp();
-app.UseHttpsRedirection();
 
 app.Run();

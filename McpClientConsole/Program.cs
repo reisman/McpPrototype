@@ -23,28 +23,28 @@ var toolNames = string.Join(",", tools);
 Console.WriteLine($"Tools available: {toolNames}");
 
 // Get parts
-var result = await connection.ExecuteTool("get_parts", new Dictionary<string, object?>());
-Console.WriteLine("Result: " + ((TextContentBlock)result.Content[0]).Text);
+var result1 = await connection.ExecuteTool("get_parts", new Dictionary<string, object?>());
+Console.WriteLine("Result: " + ((TextContentBlock)result1.Content[0]).Text);
 Console.WriteLine();
 
 // Add sub part
-//var result = await connection.ExecuteTool("add_sub_part", new Dictionary<string, object?>()
-//{
-//    { "id", 11 },
-//    { "name", "Paint" },
-//    { "number", "1345" }
-//});
-//Console.WriteLine("Result: " + ((TextContentBlock)result.Content[0]).Text);
-//Console.WriteLine();
+var result2 = await connection.ExecuteTool("add_sub_part", new Dictionary<string, object?>()
+{
+    { "id", 11 },
+    { "name", "Paint" },
+    { "number", "1345" }
+});
+Console.WriteLine("Result: " + ((TextContentBlock)result2.Content[0]).Text);
+Console.WriteLine();
 
 // Show BOM
-//var result = await connection.ExecuteTool("show_bom", new Dictionary<string, object?>()
-//{
-//    { "id", 8 }
-//});
-//Console.WriteLine("Result:");
-//Console.WriteLine(((TextContentBlock)result.Content[0]).Text);
-//Console.WriteLine();
+var result3 = await connection.ExecuteTool("show_bom", new Dictionary<string, object?>()
+{
+    { "id", 8 }
+});
+Console.WriteLine("Result:");
+Console.WriteLine(((TextContentBlock)result3.Content[0]).Text);
+Console.WriteLine();
 
 Console.WriteLine("Done");
 Console.ReadLine();
