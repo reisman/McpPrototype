@@ -19,12 +19,18 @@ public static class BomRepository
     public static async ValueTask<IReadOnlyDictionary<int, Part?>> Find(IReadOnlyCollection<int> ids, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
-        var resultMap = await context
+        var results = await context
             .Parts
             .Where(p => ids.Contains(p.Id))
-            .ToDictionaryAsync(p => p.Id, p => p);
+            .ToListAsync();
 
-        return ids.ToDictionary(id => id, id => (Part?)resultMap.GetValueOrDefault(id));
+        var resultMap = results.ToDictionary(p => p.Id, Part? (p) => p);
+        foreach (var id in ids.Where(id => !resultMap.ContainsKey(id)))
+        {
+            resultMap.Add(id, null);
+        }
+
+        return resultMap;
     }
     
     public static async Task<Part?> LoadBom(int id, CancellationToken cancellationToken)
