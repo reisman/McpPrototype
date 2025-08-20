@@ -24,7 +24,7 @@ public static class BomRepository
             .Where(p => ids.Contains(p.Id))
             .ToDictionaryAsync(p => p.Id, p => p);
 
-        return ids.ToDictionary(id => id, resultMap.GetValueOrDefault);
+        return ids.ToDictionary(id => id, id => (Part?)resultMap.GetValueOrDefault(id));
     }
     
     public static async Task<Part?> LoadBom(int id, CancellationToken cancellationToken)
