@@ -2,20 +2,37 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BomDataAccess;
 
+/// <summary>
+/// Provides static methods for accessing and manipulating Part entities in the BOM database.
+/// </summary>
 public static class BomRepository
 {
+    /// <summary>
+    /// Retrieves all Part entities from the database.
+    /// </summary>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     public static async ValueTask<IReadOnlyCollection<Part>> FindAll(CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         return await context.Parts.ToListAsync(cancellationToken);
     }
     
+    /// <summary>
+    /// Finds a Part entity by its id.
+    /// </summary>
+    /// <param name="id">The unique identifier of the Part.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     public static async ValueTask<Part?> Find(int id, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         return await context.Parts.FindAsync([id], cancellationToken: cancellationToken);
     }
     
+    /// <summary>
+    /// Finds Part entities by their ids.
+    /// </summary>
+    /// <param name="ids">A collection of Part ids to search for.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     public static async ValueTask<IReadOnlyDictionary<int, Part?>> Find(IReadOnlyCollection<int> ids, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
@@ -33,6 +50,12 @@ public static class BomRepository
         return resultMap;
     }
     
+    /// <summary>
+    /// Loads the Bill of Materials (BOM) for a given Part id, including all child parts.
+    /// </summary>
+    /// <param name="id">The unique identifier of the root Part.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The root Part with its children loaded, or null if not found.</returns>
     public static async Task<Part?> LoadBom(int id, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
@@ -58,6 +81,12 @@ public static class BomRepository
         return rootPart;
     }
     
+    /// <summary>
+    /// Creates a new Part entity in the database.
+    /// </summary>
+    /// <param name="part">The Part entity to create.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The id of the newly created Part.</returns>
     public static async ValueTask<int> Create(Part part, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
@@ -66,6 +95,11 @@ public static class BomRepository
         return part.Id;
     }
     
+    /// <summary>
+    /// Updates an existing Part entity in the database.
+    /// </summary>
+    /// <param name="part">The Part entity to update.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     public static async ValueTask Update(Part part, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
@@ -74,6 +108,13 @@ public static class BomRepository
         await context.SaveChangesAsync(cancellationToken);
     }
     
+    /// <summary>
+    /// Adds a sub-part to the Part with the specified id. Returns the new sub-part's id, or null if parent not found.
+    /// </summary>
+    /// <param name="id">The id of the parent Part.</param>
+    /// <param name="subPart">The sub-part entity to add.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The id of the newly added sub-part, or null if parent not found.</returns>
     public static async ValueTask<int?> AddSubPart(int id, Part subPart, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
@@ -90,6 +131,12 @@ public static class BomRepository
         return subPart.Id;
     }
 
+    /// <summary>
+    /// Creates a copy of the given Part entity and saves it to the database.
+    /// </summary>
+    /// <param name="sourcePart">The source Part entity to copy.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The copied Part entity.</returns>
     public static async ValueTask<Part> Copy(Part sourcePart, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
@@ -107,6 +154,12 @@ public static class BomRepository
         return copiedPart;
     }
     
+    /// <summary>
+    /// Deletes the Part entity with the specified id from the database.
+    /// </summary>
+    /// <param name="id">The unique identifier of the Part to delete.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>True if the Part was deleted, false if not found.</returns>
     public static async ValueTask<bool> Delete(int id, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
