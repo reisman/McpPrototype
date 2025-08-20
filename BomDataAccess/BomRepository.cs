@@ -171,4 +171,29 @@ public static class BomRepository
         await context.SaveChangesAsync(cancellationToken);
         return true;
     }
+
+    /// <summary>
+    /// Calculates the total number of child parts within the BOM for the specified root part id using a recursive CTE for performance.
+    /// </summary>
+    /// <param name="id">The unique identifier of the root Part.</param>
+    /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <returns>The total number of child parts (excluding the root part itself).</returns>
+    public static async Task<int> CountChildPartsAsync(int id, CancellationToken cancellationToken)
+    {
+        await using var context = BomDbContext.Create();
+        var sql = @"
+            WITH RecursiveParts AS (
+                SELECT Id FROM Parts WHERE ParentId = {0}
+                UNION ALL
+                SELECT p.Id FROM Parts p
+                INNER JOIN RecursiveParts rp ON p.ParentId = rp.Id
+            )
+            SELECT COUNT(*) AS Count FROM RecursiveParts
+        ";
+        
+        return await context
+            .Database
+            .SqlQueryRaw<int>(sql, id)
+            .SingleAsync(cancellationToken);
+    }
 }
