@@ -16,6 +16,17 @@ public static class BomRepository
         return await context.Parts.FindAsync([id], cancellationToken: cancellationToken);
     }
     
+    public static async ValueTask<IReadOnlyDictionary<int, Part?>> Find(IReadOnlyCollection<int> ids, CancellationToken cancellationToken)
+    {
+        await using var context = BomDbContext.Create();
+        var resultMap = await context
+            .Parts
+            .Where(p => ids.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id, p => p);
+
+        return ids.ToDictionary(id => id, resultMap.GetValueOrDefault);
+    }
+    
     public static async Task<Part?> LoadBom(int id, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
@@ -44,7 +55,7 @@ public static class BomRepository
     public static async ValueTask<int> Create(Part part, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
-        context.Parts.Add(part);
+        await context.Parts.AddAsync(part, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         return part.Id;
     }
@@ -66,11 +77,28 @@ public static class BomRepository
             .FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
         if (part is null) return null;
 
-        context.Parts.Add(subPart);
+        await context.Parts.AddAsync(subPart, cancellationToken);
         part.Children.Add(subPart);
         await context.SaveChangesAsync(cancellationToken);
 
         return subPart.Id;
+    }
+
+    public static async ValueTask<Part> Copy(Part sourcePart, CancellationToken cancellationToken)
+    {
+        await using var context = BomDbContext.Create();
+        
+        var copiedPart = new Part
+        {
+            Name = sourcePart.Name,
+            Number = sourcePart.Number,
+            Parent = sourcePart.Parent
+        };
+    
+        await context.Parts.AddAsync(copiedPart, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+        
+        return copiedPart;
     }
     
     public static async ValueTask<bool> Delete(int id, CancellationToken cancellationToken)
