@@ -196,7 +196,7 @@ public static class BomRepository
                 SELECT p.Id FROM Parts p
                 INNER JOIN RecursiveParts rp ON p.ParentId = rp.Id
             )
-            SELECT COUNT(*) AS Count FROM RecursivePartsTemp
+            SELECT COUNT(*) AS Count FROM RecursiveParts
         ";
 
         return await context
