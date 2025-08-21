@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace BomDataAccess;
 
@@ -11,7 +12,7 @@ public static class BomRepository
     /// Retrieves all Part entities from the database.
     /// </summary>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    public static async ValueTask<IReadOnlyCollection<Part>> FindAll(CancellationToken cancellationToken)
+    public static async ValueTask<IReadOnlyCollection<Part>> FindAll(ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         return await context.Parts.ToListAsync(cancellationToken);
@@ -22,7 +23,8 @@ public static class BomRepository
     /// </summary>
     /// <param name="id">The unique identifier of the Part.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    public static async ValueTask<Part?> Find(int id, CancellationToken cancellationToken)
+    /// <param name="logger">Logger for diagnostic output.</param>
+    public static async ValueTask<Part?> Find(int id, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         return await context.Parts.FindAsync([id], cancellationToken: cancellationToken);
@@ -33,7 +35,8 @@ public static class BomRepository
     /// </summary>
     /// <param name="ids">A collection of Part ids to search for.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    public static async ValueTask<IReadOnlyDictionary<int, Part?>> Find(IReadOnlyCollection<int> ids, CancellationToken cancellationToken)
+    /// <param name="logger">Logger for diagnostic output.</param>
+    public static async ValueTask<IReadOnlyDictionary<int, Part?>> Find(IReadOnlyCollection<int> ids, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         var results = await context
@@ -55,11 +58,12 @@ public static class BomRepository
     /// </summary>
     /// <param name="id">The unique identifier of the root Part.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <param name="logger">Logger for diagnostic output.</param>
     /// <returns>The root Part with its children loaded, or null if not found.</returns>
-    public static async Task<Part?> LoadBom(int id, CancellationToken cancellationToken)
+    public static async Task<Part?> LoadBom(int id, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
-        var rootPart = await Find(id, cancellationToken);
+        var rootPart = await Find(id, logger, cancellationToken);
         if (rootPart is null) return null;
         
         var currentParts = new[] { rootPart };
@@ -86,8 +90,9 @@ public static class BomRepository
     /// </summary>
     /// <param name="part">The Part entity to create.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <param name="logger">Logger for diagnostic output.</param>
     /// <returns>The id of the newly created Part.</returns>
-    public static async ValueTask<int> Create(Part part, CancellationToken cancellationToken)
+    public static async ValueTask<int> Create(Part part, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         await context.Parts.AddAsync(part, cancellationToken);
@@ -100,7 +105,8 @@ public static class BomRepository
     /// </summary>
     /// <param name="part">The Part entity to update.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
-    public static async ValueTask Update(Part part, CancellationToken cancellationToken)
+    /// <param name="logger">Logger for diagnostic output.</param>
+    public static async ValueTask Update(Part part, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         context.Parts.Attach(part);
@@ -114,8 +120,9 @@ public static class BomRepository
     /// <param name="id">The id of the parent Part.</param>
     /// <param name="subPart">The sub-part entity to add.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <param name="logger">Logger for diagnostic output.</param>
     /// <returns>The id of the newly added sub-part, or null if parent not found.</returns>
-    public static async ValueTask<int?> AddSubPart(int id, Part subPart, CancellationToken cancellationToken)
+    public static async ValueTask<int?> AddSubPart(int id, Part subPart, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         
@@ -136,8 +143,9 @@ public static class BomRepository
     /// </summary>
     /// <param name="sourcePart">The source Part entity to copy.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <param name="logger">Logger for diagnostic output.</param>
     /// <returns>The copied Part entity.</returns>
-    public static async ValueTask<Part> Copy(Part sourcePart, CancellationToken cancellationToken)
+    public static async ValueTask<Part> Copy(Part sourcePart, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         
@@ -159,14 +167,13 @@ public static class BomRepository
     /// </summary>
     /// <param name="id">The unique identifier of the Part to delete.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <param name="logger">Logger for diagnostic output.</param>
     /// <returns>True if the Part was deleted, false if not found.</returns>
-    public static async ValueTask<bool> Delete(int id, CancellationToken cancellationToken)
+    public static async ValueTask<bool> Delete(int id, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
-        
-        var part = await Find(id, cancellationToken);
+        var part = await Find(id, logger, cancellationToken);
         if (part is null) return false;
-        
         context.Parts.Remove(part);
         await context.SaveChangesAsync(cancellationToken);
         return true;
@@ -177,8 +184,9 @@ public static class BomRepository
     /// </summary>
     /// <param name="id">The unique identifier of the root Part.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
+    /// <param name="logger">Logger for diagnostic output.</param>
     /// <returns>The total number of child parts (excluding the root part itself).</returns>
-    public static async Task<int> CountChildPartsAsync(int id, CancellationToken cancellationToken)
+    public static async Task<int> CountChildPartsAsync(int id, ILogger logger, CancellationToken cancellationToken)
     {
         await using var context = BomDbContext.Create();
         var sql = @"
@@ -190,7 +198,7 @@ public static class BomRepository
             )
             SELECT COUNT(*) AS Count FROM RecursivePartsTemp
         ";
-        
+
         return await context
             .Database
             .SqlQueryRaw<int>(sql, id)
