@@ -10,3 +10,4 @@ IdentityDB
 .DS_Store
 secrets.json
 McpPrototype.sln.DotSettings.user
+copilot-instructions.md

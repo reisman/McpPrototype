@@ -6,14 +6,14 @@ namespace BomAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public sealed class BomController : ControllerBase
+public sealed class BomController(ILogger<BomController> logger) : ControllerBase
 {
     #region find
     
     [HttpGet("{id:int}")]
     public async ValueTask<PartDto?> Find(int id, CancellationToken cancellationToken)
     {
-        var part = await BomRepository.Find(id, cancellationToken);
+        var part = await BomRepository.Find(id, logger, cancellationToken);
         if (part is null) return null;
 
         return new PartDto
@@ -27,7 +27,7 @@ public sealed class BomController : ControllerBase
     [HttpGet]
     public async ValueTask<IEnumerable<PartDto>> FindAll(CancellationToken cancellationToken)
     {
-        var parts = await BomRepository.FindAll(cancellationToken);
+        var parts = await BomRepository.FindAll(logger, cancellationToken);
         return parts.Select(part => new PartDto
         {
             Id = part.Id,
@@ -40,7 +40,7 @@ public sealed class BomController : ControllerBase
     [HttpGet("showbom/{id:int}")]
     public async ValueTask<string> ShowBom(int id, CancellationToken cancellationToken)
     {
-        var rootPart = await BomRepository.LoadBom(id, cancellationToken);
+        var rootPart = await BomRepository.LoadBom(id, logger, cancellationToken);
         if (rootPart is null) return string.Empty;
         
         var builder = new StringBuilder();
@@ -55,10 +55,9 @@ public sealed class BomController : ControllerBase
         var message = $"{prefix}Part Id: {part.Id}, Name: {part.Name}, Number: {part.Number}";
         builder.AppendLine(message);
 
-        var children = part.Children.ToList() ?? new List<Part>();
-        for (int i = 0; i < children.Count; i++)
+        var children = part.Children.ToList();
+        foreach (var child in children)
         {
-            var child = children[i];
             PrintBomRecursive(child, builder, indentLevel + 1);
         }
     }
@@ -76,7 +75,7 @@ public sealed class BomController : ControllerBase
             Number = partDto.Number
         };
 
-        return BomRepository.Create(part, cancellationToken);
+        return BomRepository.Create(part, logger, cancellationToken);
     }
     
     #endregion
@@ -93,7 +92,7 @@ public sealed class BomController : ControllerBase
             Number = partDto.Number
         };
 
-        return BomRepository.Update(part, cancellationToken);
+        return BomRepository.Update(part, logger, cancellationToken);
     }
     
     [HttpPatch("addsubpart/{id:int}")]
@@ -105,7 +104,7 @@ public sealed class BomController : ControllerBase
             Number = subPartDto.Number
         };
 
-        await BomRepository.AddSubPart(id, subPart, cancellationToken);
+        await BomRepository.AddSubPart(id, subPart, logger, cancellationToken);
     }
     
     #endregion
@@ -115,7 +114,7 @@ public sealed class BomController : ControllerBase
     [HttpDelete("{id:int}")]
     public async ValueTask<bool> Delete(int id, CancellationToken cancellationToken)
     {
-        return await BomRepository.Delete(id, cancellationToken);
+        return await BomRepository.Delete(id, logger, cancellationToken);
     }
     
     #endregion
